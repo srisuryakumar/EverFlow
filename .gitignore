@@ -1,0 +1,39 @@
+# SECRETS — never commit
+keys.json
+*.keys.json
+config.json
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+pylint_libs/
+pyre_cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+assets/icon.iconset/
+*.icns
+router.log

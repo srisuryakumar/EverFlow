@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ollama:*)",
+      "Bash(curl -s http://localhost:8000/dashboard/keys)",
+      "Bash(curl -s -X POST http://localhost:8000/v1/chat/completions -H \"Content-Type: application/json\" -d '{\"model\": \"llama2\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}')",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s -X POST http://localhost:8000/v1/messages -H \"Content-Type: application/json\" -d '{\"model\": \"llama2\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}')",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(kill 27226:*)",
+      "Bash(xargs kill:*)",
+      "Bash(find /Users/srisuryakumarm/Downloads/OllamaRouter -name \"*.pyc\" -delete)",
+      "Bash(find /Users/srisuryakumarm/Downloads/OllamaRouter -name \"__pycache__\" -type d -exec rm -rf {} +)",
+      "Bash(kill -9 73369)",
+      "Bash(env)",
+      "Read(//Users/srisuryakumarm/Downloads/OllamaRouter/**)",
+      "Read(//Library/LaunchDaemons/**)",
+      "Bash(ls -la ~/.claude/*.json)",
+      "Bash(security find-generic-password:*)",
+      "Bash(echo \"=== Check for API key storage ===\" grep -r \"api\" ~/.claude/*.json)",
+      "Bash(echo \"=== Check memory folder ===\" ls -la ~/.claude/projects/-Users-srisuryakumarm-Downloads-OllamaRouter/memory/ echo \"\" cat ~/.claude/projects/-Users-srisuryakumarm-Downloads-OllamaRouter/memory/*.md)",
+      "Bash(date echo:*)",
+      "Bash(chmod +x:*)",
+      "Bash(./build.sh:*)",
+      "Bash(pytest tests/ -v)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(pip install *)",
+      "Bash(python -c ' *)",
+      "Bash(python main.py)",
+      "Bash(python -m json.tool)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('logs',[]\\)[:3],indent=2\\)\\)\")",
+      "Bash(export ANTHROPIC_BASE_URL=http://127.0.0.1:8000)",
+      "Bash(powershell *)",
+      "Bash(export ANTHROPIC_API_KEY=\"\")",
+      "Bash(export ANTHROPIC_AUTH_TOKEN=ollama)",
+      "PowerShell(echo \"ANTHROPIC_BASE_URL=$env:ANTHROPIC_BASE_URL\"; echo \"ANTHROPIC_API_KEY=$env:ANTHROPIC_API_KEY\"; echo \"ANTHROPIC_AUTH_TOKEN=$env:ANTHROPIC_AUTH_TOKEN\")",
+      "PowerShell($env:ANTHROPIC_BASE_URL=\"http://127.0.0.1:8000\"; [Environment]::SetEnvironmentVariable\\(\"ANTHROPIC_BASE_URL\", $env:ANTHROPIC_BASE_URL, \"User\"\\))"
+    ]
+  }
+}

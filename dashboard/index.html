@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EverFlow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0a0a0f;
+  --surface:   #12121a;
+  --card:      #1a1a24;
+  --border:    #252533;
+  --border2:   #2e2e3f;
+  --accent:    #7c73ff;
+  --accent-dim:#7c73ff15;
+  --teal:      #34d399;
+  --amber:     #fbbf24;
+  --red:       #f87171;
+  --text:      #f8f8fa;
+  --text2:     #a5a5b8;
+  --text3:     #6b6b85;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Inter', system-ui, sans-serif;
+  --radius:    12px;
+  --radius-sm: 8px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════ */
+#sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+#logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+#logo-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+#logo-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
+#nav {
+  padding: 12px 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  user-select: none;
+  margin: 2px 0;
+}
+.nav-item:hover {
+  background: var(--card);
+  color: var(--text);
+}
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+
+#sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+#proxy-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text2);
+}
+#proxy-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 6px var(--teal);
+  flex-shrink: 0;
+}
+#proxy-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
+#proxy-port {
+  margin-top: 4px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text3);
+}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+#content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+}
+#content::-webkit-scrollbar { width: 4px; }
+#content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.page { display: none; padding: 32px; }
+.page.active { display: block; }
+
+.page-header {
+  margin-bottom: 28px;
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.4px;
+}
+.page-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════ */
+#stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.stat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-foot {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+}
+
+/* ═══════════════════════════════════════════
+   PANEL (chart + log box)
+═══════════════════════════════════════════ */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.panel-sub {
+  font-size: 11px;
+  color: var(--text3);
+}
+.panel-body { padding: 20px; }
+
+canvas#rpmChart {
+  width: 100%;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════
+   LOG TABLE
+═══════════════════════════════════════════ */
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.log-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text3);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.log-table td {
+  padding: 9px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.log-table tr:last-child td { border-bottom: none; }
+.log-table tr:hover td { background: rgba(108,99,246,0.04); }
+.log-table .mono { font-family: var(--mono); font-size: 12px; }
+
+/* ═══════════════════════════════════════════
+   KEYS PAGE
+═══════════════════════════════════════════ */
+.keys-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.key-stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.key-stat-pill {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.key-stat-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+#key-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.key-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: border-color 0.15s;
+  position: relative;
+}
+.key-card:hover { border-color: var(--border2); }
+.key-card.key-in-use, .model-card.model-in-use {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #1e1e28 0%, #1e1c2e 100%);
+}
+.key-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.key-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.key-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 99px;
+}
+.badge-inuse    { background: rgba(108,99,246,0.15); color: var(--accent); border: 1px solid rgba(108,99,246,0.3); }
+.badge-active   { background: rgba(52,211,153,0.1);  color: var(--teal);   border: 1px solid rgba(52,211,153,0.25); }
+.badge-exhausted{ background: rgba(251,191,36,0.1);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.25); }
+.badge-invalid  { background: rgba(248,113,113,0.1); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+.badge-disabled { background: rgba(96,96,120,0.1);   color: var(--text3);  border: 1px solid var(--border); }
+
+.key-value {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+.key-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text3);
+}
+.key-meta span { display: flex; align-items: center; gap: 4px; }
+.key-actions-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.in-use-label {
+  position: absolute;
+  top: -1px;
+  right: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 8px;
+  border-radius: 0 0 6px 6px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+}
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+.empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.empty-sub { font-size: 13px; }
+
+/* ═══════════════════════════════════════════
+   MODELS PAGE
+═══════════════════════════════════════════ */
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.model-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.15s;
+}
+.model-card:hover { border-color: var(--accent); }
+.model-name {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.model-provider {
+  font-size: 12px;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+.model-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid #6c63f630;
+}
+
+/* ═══════════════════════════════════════════
+   SETTINGS PAGE
+═══════════════════════════════════════════ */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 900px;
+}
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.settings-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text3);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.settings-body { padding: 16px 20px; }
+.field {
+  margin-bottom: 16px;
+}
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.field input, .field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+}
+.field-hint {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+.settings-save {
+  margin-top: 20px;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { opacity: 0.88; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+.btn-danger:hover:not(:disabled) { background: rgba(248,113,113,0.08); }
+.btn-sm { font-size: 11px; padding: 4px 10px; }
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+#modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  width: 520px;
+  max-width: 95vw;
+  padding: 28px;
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.modal-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+.modal-textarea {
+  width: 100%;
+  height: 150px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 10px;
+  resize: vertical;
+  outline: none;
+}
+.modal-textarea:focus { border-color: var(--accent); }
+.modal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  margin-top: 10px;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-preview {
+  font-size: 12px;
+  color: var(--amber);
+  margin: 8px 0;
+  min-height: 18px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-result {
+  font-size: 12px;
+  margin-top: 10px;
+  min-height: 16px;
+}
+
+/* ═══════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════ */
+.countdown { color: var(--amber); font-size: 11px; }
+.text-teal   { color: var(--teal); }
+.text-amber  { color: var(--amber); }
+.text-red    { color: var(--red); }
+.text-dim    { color: var(--text3); }
+
+.status-icon {
+  font-size: 13px;
+  margin-right: 2px;
+}
+
+@media (max-width: 1100px) {
+  #stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .settings-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  #sidebar { width: 56px; min-width: 56px; }
+  .nav-item span { display: none; }
+  #logo-title, #logo-sub, #proxy-port { display: none; }
+  .page { padding: 16px; }
+  #stat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div id="logo">
+    <div id="logo-title">EverFlow</div>
+    <div id="logo-sub">Key Rotation Proxy</div>
+  </div>
+
+  <div id="nav">
+    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Dashboard</span>
+    </div>
+    <div class="nav-item" data-page="keys" onclick="navigate('keys')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="8" cy="15" r="5"/><path d="m13 9 3.5-3.5M22 2l-1.5 1.5L22 5l-3 3-1.5-1.5M16.5 5.5l-1 1"/>
+      </svg>
+      <span>Keys</span>
+    </div>
+    <div class="nav-item" data-page="models" onclick="navigate('models')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+      <span>Models</span>
+    </div>
+  </div>
+  </div>
+
+  <div id="sidebar-footer">
+    <div id="proxy-status">
+      <div id="proxy-dot"></div>
+      <span id="proxy-label">Proxy running</span>
+    </div>
+    <div id="proxy-port">localhost:8000</div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div id="content">
+
+  <!-- ── DASHBOARD PAGE ── -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="last-updated">Loading...</div>
+    </div>
+
+    <div id="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Requests</div>
+        <div class="stat-value" id="s-requests">—</div>
+        <div class="stat-foot">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Success Rate</div>
+        <div class="stat-value" id="s-rate">—</div>
+        <div class="stat-foot">Last 500 requests</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Latency</div>
+        <div class="stat-value" id="s-latency">—</div>
+        <div class="stat-foot">Milliseconds</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tokens (In / Out)</div>
+        <div class="stat-value" id="s-tokens">—</div>
+        <div class="stat-foot">Aggregate usage</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Requests / Minute</span>
+        <span class="panel-sub">Last 30 minutes</span>
+      </div>
+      <div class="panel-body">
+        <canvas id="rpmChart" height="100"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Recent Requests</span>
+        <span class="panel-sub" id="log-count"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Key</th>
+              <th>Model</th>
+              <th>Status</th>
+              <th style="text-align:right">Latency</th>
+              <th style="text-align:right">Tokens</th>
+              <th style="text-align:center">Tries</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No requests yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KEYS PAGE ── -->
+  <div class="page" id="page-keys">
+    <div class="page-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="page-title">API Keys</div>
+          <div class="page-sub">Manage your EverFlow cloud API keys</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="enableAllKeys()">Enable All</button>
+          <button class="btn btn-primary" onclick="openModal()">+ Add Key</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-stats-row" id="key-stats-row">
+      <div class="key-stat-pill"><div class="key-stat-dot" style="background:var(--accent)"></div><span id="pill-inuse">0 in use</span></div>
+      <div class="key-stat-pill"><div class="key-stat-dot" style="background:var(--teal)"></div><span id="pill-active">0 active</span></div>
+      <div class="key-stat-pill"><div class="key-stat-dot" style="background:var(--amber)"></div><span id="pill-exhausted">0 exhausted</span></div>
+      <div class="key-stat-pill"><div class="key-stat-dot" style="background:var(--red)"></div><span id="pill-invalid">0 invalid</span></div>
+    </div>
+
+    <div id="key-grid">
+      <div class="empty-state">
+        <div class="empty-icon">🔑</div>
+        <div class="empty-title">No keys yet</div>
+        <div class="empty-sub">Click "+ Add Key" to add your EverFlow API key</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODELS PAGE ── -->
+  <div class="page" id="page-models">
+    <div class="page-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="page-title">Models</div>
+          <div class="page-sub">Manage your available models and default routing</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModelModal()">+ Add Model</button>
+      </div>
+    </div>
+
+    <div id="model-grid" class="model-grid">
+      <div class="empty-state">
+        <div class="empty-icon">🧠</div>
+        <div class="empty-title">No models configured</div>
+        <div class="empty-sub">Add models to your config.json</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#content -->
+
+<!-- ADD KEY MODAL -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="modal">
+    <div class="modal-title">Add API Key</div>
+    <div class="modal-sub">Add a new API key to the rotation pool</div>
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Account Name</label>
+      <input class="modal-input" id="modal-name" type="text" placeholder="e.g., Personal, Work, Backup" style="margin-top:0">
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">API Key</label>
+      <input class="modal-input" id="modal-key" type="text" placeholder="sk-ol-..." style="margin-top:0">
+    </div>
+    <div class="modal-result" id="modal-result"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-submit" onclick="submitKey()">Add Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODEL MODAL -->
+<div id="model-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:1001; align-items:center; justify-content:center" onclick="handleModelOverlayClick(event)">
+  <div id="model-modal" style="background:var(--surface); border:1px solid var(--border2); border-radius:12px; width:400px; max-width:90vw; padding:28px">
+    <div class="modal-title">Add Model</div>
+    <div class="modal-sub">Configure a new model for the proxy</div>
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Model Name</label>
+      <input class="modal-input" id="modal-model-name" type="text" placeholder="e.g., DeepSeek V3.1" style="margin-top:0">
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Model Tag</label>
+      <input class="modal-input" id="modal-model-tag" type="text" placeholder="e.g., gemma4:31b-cloud" style="margin-top:0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModelModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addModel()">Add Model</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+const S = {
+  keys: [],
+  logs: [],
+  summary: {},
+  rpm: [],
+  currentKeyId: null,   // key currently "in use" (most recently used)
+  deleteConfirm: null,
+  logLimit: 50,
+  availableModels: [],
+  defaultModel: '',
+};
+
+// ─────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  document.querySelectorAll('.page').forEach(el => {
+    el.classList.toggle('active', el.id === 'page-' + page);
+  });
+  if (page === 'settings') refreshAll(); // Settings are now loaded in refreshAll()
+  if (page === 'models') renderModels();
+  if (page === 'keys') renderKeys();
+}
+
+// ─────────────────────────────────────────────────────────
+// FETCH HELPERS
+// ─────────────────────────────────────────────────────────
+async function api(path, opts) {
+  try {
+    const r = await fetch(path, opts);
+    return await r.json();
+  } catch (e) {
+    console.error('API error:', path, e);
+    setProxyStatus(false);
+    return null;
+  }
+}
+
+
+async function refreshAll() {
+  try {
+    // Use combined endpoint for better performance
+    const d = await api('/dashboard/all?limit=' + S.logLimit);
+    if (!d) return;
+
+    // Update all state from single response
+    S.summary = d.summary || {};
+    S.keys = d.keys || [];
+    S.logs = d.logs || [];
+    S.rpm = d.rpm || [];
+    S.currentKeyId = d.current_key_id;
+
+    // Update UI components
+    renderCards(S.summary);
+    renderKeyPills(d.stats || {});
+    renderTable(S.logs);
+    drawChart(S.rpm);
+    renderKeys();
+    renderModels();
+
+    // Update model state
+    if (d.config) {
+      S.availableModels = d.config.available_models || [];
+      S.defaultModel = (d.config.ollama || {}).default_model || '';
+    }
+
+    const now = new Date();
+    const el = document.getElementById('last-updated');
+    if (el) el.textContent = 'Last updated ' + now.toLocaleTimeString();
+
+    // Update proxy status
+    setProxyStatus(true);
+
+  } catch (e) {
+    console.error('Refresh error:', e);
+    setProxyStatus(false);
+  }
+}
+
+// Auto-refresh with configurable interval
+let refreshInterval = 2000; // Default 2 seconds
+
+async function smartRefresh() {
+  if (document.hidden) return; // Don't refresh if tab is backgrounded
+  const activePage = document.querySelector('.nav-item.active')?.dataset.page;
+  if (!activePage) return;
+
+  try {
+    if (activePage === 'dashboard') {
+      const [summary, logs, rpm] = await Promise.all([
+        api('/dashboard/summary'),
+        api('/dashboard/logs?limit=' + S.logLimit),
+        api('/dashboard/chart/rpm')
+      ]);
+      if (summary) { S.summary = summary; renderCards(S.summary); }
+      if (logs) { S.logs = logs.logs || []; renderTable(S.logs); }
+      if (rpm) { S.rpm = rpm.data || []; drawChart(S.rpm); }
+
+      // Also refresh the current key ID from the combined endpoint or keys endpoint
+      const keysData = await api('/dashboard/keys');
+      if (keysData) S.currentKeyId = keysData.current_key_id;
+    } else if (activePage === 'keys') {
+
+      const d = await api('/dashboard/keys');
+      if (d) {
+        S.keys = d.keys || [];
+        S.currentKeyId = d.current_key_id;
+        renderKeyPills(d.stats || {});
+        renderKeys();
+      }
+    } else if (activePage === 'models') {
+      const d = await api('/dashboard/config');
+      if (d) {
+        S.availableModels = d.available_models || [];
+        S.defaultModel = (d.ollama || {}).default_model || '';
+        if (activePage === 'models') renderModels();
+      }
+    }
+
+    setProxyStatus(true);
+    const now = new Date();
+    const el = document.getElementById('last-updated');
+    if (el) el.textContent = 'Last updated ' + now.toLocaleTimeString();
+  } catch (e) {
+    console.error('Smart refresh error:', e);
+    setProxyStatus(false);
+  }
+}
+
+async function initRefreshInterval() {
+  try {
+    const config = await api('/dashboard/config');
+    if (config && config.dashboard && config.dashboard.refresh_interval_ms) {
+      refreshInterval = config.dashboard.refresh_interval_ms;
+    }
+  } catch (e) {
+    console.warn('Failed to load dashboard config, using default refresh interval');
+  }
+  setInterval(smartRefresh, refreshInterval);
+}
+
+// Initialize with configurable interval
+initRefreshInterval();
+
+// ─────────────────────────────────────────────────────────
+// PROXY STATUS
+// ─────────────────────────────────────────────────────────
+function setProxyStatus(online) {
+  const dot   = document.getElementById('proxy-dot');
+  const label = document.getElementById('proxy-label');
+  dot.className = online ? '' : 'offline';
+  label.textContent = online ? 'Proxy running' : 'Proxy offline';
+}
+</script>
+<script>
+// ─────────────────────────────────────────────────────────
+// RENDER: STAT CARDS
+// ─────────────────────────────────────────────────────────
+function fmtNum(n) {
+  if (n == null) return '—';
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+
+function renderCards(s) {
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  set('s-requests', fmtNum(s.total_requests));
+
+  const rate = s.success_rate || 0;
+  const rateEl = document.getElementById('s-rate');
+  if (rateEl) {
+    rateEl.textContent = rate.toFixed(1) + '%';
+    rateEl.style.color = rate >= 95
+      ? 'var(--teal)' : rate >= 80 ? 'var(--amber)' : 'var(--red)';
+  }
+  set('s-latency', (s.avg_latency_ms || 0).toFixed(0) + 'ms');
+  const inT = s.total_input_tokens || 0;
+  const outT = s.total_output_tokens || 0;
+  set('s-tokens', `${fmtNum(inT)} / ${fmtNum(outT)}`);
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER: KEY PILLS (summary row above key grid)
+// ─────────────────────────────────────────────────────────
+function renderKeyPills(stats) {
+  const inUse = S.currentKeyId ? 1 : 0;
+  const active = (stats.active || 0) - inUse;
+  document.getElementById('pill-inuse').textContent     = inUse + ' in use';
+  document.getElementById('pill-active').textContent    = active + ' ready';
+  document.getElementById('pill-exhausted').textContent = (stats.exhausted || 0) + ' exhausted';
+  document.getElementById('pill-invalid').textContent   = (stats.invalid || 0) + ' invalid';
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER: KEYS PAGE
+// ─────────────────────────────────────────────────────────
+function getBadge(key) {
+  if (key.key_id === S.currentKeyId) return ['badge-inuse',   'In Use'];
+  const map = {
+    active:   ['badge-active',    'Ready'],
+    exhausted:['badge-exhausted', 'Exhausted'],
+    cooldown: ['badge-exhausted', 'Cooldown'],
+    invalid:  ['badge-invalid',   'Invalid'],
+    disabled: ['badge-disabled',  'Disabled'],
+  };
+  return map[key.status] || ['badge-disabled', key.status];
+}
+
+function renderKeys() {
+  const grid = document.getElementById('key-grid');
+  if (!grid) return;
+  if (!S.keys.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔑</div>
+        <div class="empty-title">No keys yet</div>
+        <div class="empty-sub">Click "+ Add Key" to add your EverFlow API key</div>
+      </div>`;
+    return;
+  }
+
+  // Sort: in-use first, then active, then exhausted, then invalid/disabled
+  const order = { inuse: 0, active: 1, exhausted: 2, cooldown: 2, invalid: 3, disabled: 4 };
+  const sorted = [...S.keys].sort((a, b) => {
+    const ao = a.key_id === S.currentKeyId ? 0 : (order[a.status] ?? 5);
+    const bo = b.key_id === S.currentKeyId ? 0 : (order[b.status] ?? 5);
+    return ao - bo;
+  });
+
+  grid.innerHTML = sorted.map(k => {
+    const [badgeCls, badgeLabel] = getBadge(k);
+    const isInUse = k.key_id === S.currentKeyId;
+    const isDel   = S.deleteConfirm === k.key_id;
+
+    const cd = k.seconds_until_recovery;
+    const cdHtml = cd && cd > 0
+      ? `<div class="countdown" data-until="${Date.now() + cd * 1000}">
+           Resets in ${fmtCountdown(cd)}
+         </div>` : '';
+
+    return `
+    <div class="key-card${isInUse ? ' key-in-use' : ''}" id="kc-${k.key_id}">
+      ${isInUse ? '<div class="in-use-label">● In Use</div>' : ''}
+      <div class="key-card-top">
+        <div class="key-name">${escHtml(k.display_name)}</div>
+        <span class="key-badge ${badgeCls}">${badgeLabel}</span>
+      </div>
+      <div class="key-value">${escHtml(k.api_key)}</div>
+      <div class="key-meta">
+        <span>↑ ${fmtNum(k.total_requests)} req</span>
+        <span>◈ ${fmtNum(k.total_tokens)} tok</span>
+        <span>✗ ${k.exhaustion_count} exhausted</span>
+      </div>
+      ${cdHtml}
+    <div class="key-actions-row">
+        <button class="btn btn-ghost btn-sm" onclick="keyAction('${k.key_id}','enable')">Enable</button>
+        <button class="btn btn-ghost btn-sm" onclick="keyDelete('${k.key_id}')">
+          ${isDel ? 'Confirm delete?' : '🗑 Delete'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtCountdown(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+// Live countdown tick
+setInterval(() => {
+  document.querySelectorAll('[data-until]').forEach(el => {
+    const rem = Math.max(0, Math.round((+el.dataset.until - Date.now()) / 1000));
+    el.textContent = rem > 0
+      ? 'Resets in ' + fmtCountdown(rem)
+      : 'Recovering...';
+    if (rem === 0) setTimeout(refreshAll, 1000);
+  });
+}, 1000);
+
+// ─────────────────────────────────────────────────────────
+// RENDER: LOG TABLE
+// ─────────────────────────────────────────────────────────
+const OUTCOME_LABELS = {
+  success:             { icon: '✓', cls: 'text-teal', label: 'Success' },
+  rate_limited:        { icon: '⚠', cls: 'text-amber', label: 'Rate Limited' },
+  key_invalid:         { icon: '🔑', cls: 'text-red', label: 'Key Invalid' },
+  all_keys_exhausted:  { icon: '⊗', cls: 'text-red', label: 'All Keys Exhausted' },
+  max_retries:         { icon: '✕', cls: 'text-red', label: 'Max Retries Reached' },
+  bad_request:         { icon: '⊘', cls: 'text-dim', label: 'Bad Request' },
+  server_error:        { icon: '✕', cls: 'text-red', label: 'Server Error' },
+};
+
+function renderTable(logs) {
+  const count = document.getElementById('log-count');
+  if (count) count.textContent = `(${logs.length})`;
+
+  const tbody = document.getElementById('log-body');
+  if (!tbody) return;
+  if (!logs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No requests yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = logs.map(l => {
+    const t = new Date(l.timestamp);
+    const time = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const { icon, cls, label } = OUTCOME_LABELS[l.outcome] || { icon: '?', cls: 'text-dim', label: l.outcome };
+    const key   = escHtml(l.key_alias || l.key_used_masked || '—');
+    const model = (l.model_requested || '').replace(':cloud', '');
+    const lat   = l.latency_ms != null ? l.latency_ms + 'ms' : '—';
+    const tok   = l.input_tokens && l.output_tokens
+                     ? `${fmtNum(l.input_tokens)} / ${fmtNum(l.output_tokens)}`
+                     : (l.total_tokens ? fmtNum(l.total_tokens) : '—');
+    return `<tr>
+      <td class="mono" style="color:var(--text3)">${time}</td>
+      <td>${key}</td>
+      <td style="color:var(--text3)">${escHtml(model)}</td>
+      <td><span class="${cls}">${icon}</span> ${label}</td>
+      <td class="mono" style="text-align:right">${lat}</td>
+      <td class="mono" style="text-align:right">${tok}</td>
+      <td style="text-align:center">${l.attempts}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER: MODELS PAGE
+// ─────────────────────────────────────────────────────────
+
+function renderModels() {
+  const models = S.availableModels || [];
+  const currentModel = S.defaultModel || '';
+  const grid = document.getElementById('model-grid');
+
+  // Render model cards
+  if (!grid) return;
+  if (!models.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🧠</div>
+        <div class="empty-title">No models configured</div>
+        <div class="empty-sub">Add models to your config.json</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = models.map((m, i) => {
+    const name = typeof m === 'string' ? m : (m.name || m);
+    const tag = typeof m === 'string' ? m : (m.tag || m);
+    const enabled = typeof m === 'string' ? true : (m.enabled !== false);
+    const isDefault = tag === currentModel;
+
+    return `
+    <div class="model-card${isDefault ? ' model-in-use' : ''}" id="mc-${i}">
+      <div class="key-card-top">
+        <div class="key-name" contenteditable="true" onblur="updateModelName(${i}, this.innerText)">${escHtml(name)}</div>
+        ${isDefault ? '<span class="key-badge badge-inuse">Default</span>' : ''}
+      </div>
+      <div class="key-value">${escHtml(tag)}</div>
+      <div class="key-actions-row">
+        ${!isDefault ? `<button class="btn btn-ghost btn-sm" onclick="setDefaultModelDirect('${tag.replace(/'/g, "\\'")}')">Set Default</button>` : ''}
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteModel(${i})">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function setDefaultModelDirect(modelId) {
+  const res = await api('/dashboard/config', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ollama: { default_model: modelId } }),
+  });
+  if (res && res.success) {
+    S.defaultModel = modelId;
+    await refreshAll();
+    renderModels();
+  }
+}
+
+async function updateModelName(index, name) {
+  const res = await api(`/dashboard/models/${index}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (res && res.success) {
+    await refreshAll();
+    renderModels();
+  }
+}
+
+async function toggleModelEnabled(index, enabled) {
+  const res = await api(`/dashboard/models/${index}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled }),
+  });
+  if (res && res.success) {
+    await refreshAll();
+    renderModels();
+  }
+}
+
+async function deleteModel(index) {
+  if (!confirm('Delete this model?')) return;
+  const res = await api(`/dashboard/models/${index}`, { method: 'DELETE' });
+  if (res && res.success) {
+    await refreshAll();
+    renderModels();
+  }
+}
+
+async function addModel() {
+  const name = document.getElementById('modal-model-name').value.trim();
+  const tag = document.getElementById('modal-model-tag').value.trim();
+  if (!name || !tag) {
+    alert('Both name and tag are required');
+    return;
+  }
+
+  const res = await api('/dashboard/models', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, tag }),
+  });
+  if (res && res.success) {
+    closeModelModal();
+    await refreshAll();
+    renderModels();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// CHART (canvas, no library)
+// ─────────────────────────────────────────────────────────
+function drawChart(data) {
+  const canvas = document.getElementById('rpmChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth;
+  const H = 100;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  if (!data || !data.length) return;
+
+  const maxVal = Math.max(...data.map(d => d.count), 1);
+  const pad = { top: 6, bottom: 24, left: 6, right: 6 };
+  const bw  = (W - pad.left - pad.right) / data.length;
+  const ch  = H - pad.top - pad.bottom;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(42,42,56,0.9)';
+  ctx.lineWidth = 1;
+  [0.5, 1].forEach(f => {
+    const y = pad.top + ch * (1 - f);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  });
+
+  data.forEach((d, i) => {
+    const x = pad.left + i * bw;
+    const h = Math.max((d.count / maxVal) * ch, d.count > 0 ? 2 : 0);
+    const y = pad.top + ch - h;
+
+    // main bar
+    ctx.fillStyle = 'rgba(108,99,246,0.6)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x + 1.5, y, bw - 3, h, [3, 3, 0, 0]);
+    else ctx.rect(x + 1.5, y, bw - 3, h);
+    ctx.fill();
+
+    // error overlay
+    if (d.errors > 0 && d.count > 0) {
+      const eh = (d.errors / maxVal) * ch;
+      ctx.fillStyle = 'rgba(248,113,113,0.7)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x + 1.5, pad.top + ch - eh, bw - 3, eh, [3, 3, 0, 0]);
+      else ctx.rect(x + 1.5, pad.top + ch - eh, bw - 3, eh);
+      ctx.fill();
+    }
+
+    // x label every 5
+    if (i % 5 === 0) {
+      ctx.fillStyle = 'rgba(96,96,120,0.8)';
+      ctx.font = '9px monospace';
+      ctx.fillText(d.minute, x + 1, H - 6);
+    }
+  });
+}
+
+window.addEventListener('resize', () => drawChart(S.rpm));
+</script>
+<!-- interactions added next -->
+<script>
+// ─────────────────────────────────────────────────────────
+// KEY ACTIONS
+// ─────────────────────────────────────────────────────────
+async function keyAction(keyId, action) {
+  const res = await api('/dashboard/keys/' + keyId + '/' + action, { method: 'POST' });
+  if (res && res.success) await refreshAll();
+}
+
+async function enableAllKeys() {
+  const res = await api('/dashboard/keys/enable-all', { method: 'POST' });
+  if (res && res.success) await refreshAll();
+}
+
+function keyDelete(keyId) {
+  if (S.deleteConfirm === keyId) {
+    api('/dashboard/keys/' + keyId, { method: 'DELETE' }).then(r => {
+      if (r && r.success) { S.deleteConfirm = null; refreshAll(); }
+    });
+  } else {
+    S.deleteConfirm = keyId;
+    renderKeys();
+    setTimeout(() => { if (S.deleteConfirm === keyId) { S.deleteConfirm = null; renderKeys(); } }, 3000);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-name').focus();
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-key').value = '';
+  document.getElementById('modal-result').textContent = '';
+  document.getElementById('modal-submit').textContent = 'Add Key';
+}
+function handleOverlayClick(e) {
+  if (e.target.id === 'modal-overlay') closeModal();
+}
+
+function openModelModal() {
+  document.getElementById('model-modal-overlay').style.display = 'flex';
+  document.getElementById('modal-model-name').focus();
+}
+function closeModelModal() {
+  document.getElementById('model-modal-overlay').style.display = 'none';
+  document.getElementById('modal-model-name').value = '';
+  document.getElementById('modal-model-tag').value = '';
+}
+function handleModelOverlayClick(e) {
+  if (e.target.id === 'model-modal-overlay') closeModelModal();
+}
+
+async function submitKey() {
+  const resultEl = document.getElementById('modal-result');
+  const name = document.getElementById('modal-name').value.trim();
+  const apiKey = document.getElementById('modal-key').value.trim();
+  if (!apiKey) {
+    const resultEl = document.getElementById('modal-result');
+    resultEl.textContent = 'API key is required';
+    resultEl.className = 'modal-result text-red';
+    return;
+  }
+
+  const btn = document.getElementById('modal-submit');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+
+  const res = await api('/dashboard/keys/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ api_key: apiKey, alias: name || undefined }),
+  });
+
+  btn.disabled = false;
+  if (res && res.success) {
+    resultEl.textContent = '✓ Key added successfully';
+    resultEl.className = 'modal-result text-teal';
+    await refreshAll();
+    setTimeout(closeModal, 1200);
+  } else {
+    resultEl.textContent = res?.error || 'Failed to add key.';
+    resultEl.className = 'modal-result text-red';
+    btn.textContent = 'Add Key';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────────────────
+
+async function setDefaultModel() {
+  const selector = document.getElementById('model-selector');
+  const modelId = selector?.value;
+  if (!modelId) return;
+
+  const res = await api('/dashboard/config', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ollama: { default_model: modelId } }),
+  });
+  if (res && res.success) {
+    S.defaultModel = modelId;
+    renderModels();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initial load
+  await refreshAll();
+  // Auto-refresh with configurable interval
+  initRefreshInterval();
+});
+</script>
+</body>
+</html>
