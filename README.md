@@ -17,7 +17,7 @@ EverFlow is a cross-platform desktop application (macOS/Windows) that acts as a 
 ### Installation
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/EverFlow.git
+   git clone https://github.com/srisuryakumar/EverFlow.git
    cd EverFlow
    ```
 
