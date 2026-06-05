@@ -106,19 +106,26 @@ Open the dashboard via the system tray icon or at: `http://localhost:8000/dashbo
 
 EverFlow utilizes a **Smart API Routing (SARs)** layer that decouples the client request from the backend provider. This architecture allows EverFlow to function as a unified gateway between Claude Code and multiple AI model providers.
 
-### How SARs Works
-The SARs layer acts as an intelligent intermediary that:
-- **Translates Model Names**: Maps Anthropic-style model identifiers to provider-specific tags via a configurable `model_map`.
-- **Abstracts Provider Logic**: Routes requests to different backend clients (e.g., Ollama, OpenAI, Groq) based on the target model.
-- **Unified Key Management**: Applies consistent rotation and retry logic regardless of the underlying AI provider.
+### How SARS Works
+The SARs layer acts as an intelligent intermediary that transforms a generic request into a provider-specific call:
+1. **Request Interception**: EverFlow receives a request from Claude Code (e.g., specifying model `claude-3-5-sonnet`).
+2. **Map Lookup**: It checks the `model_map` in `config.json` to find the corresponding provider tag (e.g., `claude-3-5-sonnet` $\rightarrow$ `gemma4:31b-cloud`).
+3. **Provider Routing**: Based on the target tag, the router selects the appropriate provider client (e.g., Ollama, OpenAI, Gemini, or Grok) and forwards the request to the provider's specific base URL.
+
+### Provider-Agnostic Routing
+A key design principle of EverFlow is that **routing is determined by the model identifier, not by environment variables.** 
+
+While `ANTHROPIC_BASE_URL` is used to connect Claude Code to EverFlow, the decision of which provider (OpenAI, Groq, etc.) actually processes the request is handled entirely within EverFlow's internal mapping. This enables:
+- **Dynamic Switching**: Change the backend provider for any model instantly via the dashboard without restarting your terminal or changing system variables.
+- **Granular Control**: Route different model requests to different providers simultaneously (e.g., fast tasks to Groq, complex tasks to OpenAI).
 
 ### Extending the Gateway
-Because of this extensible design, adding new AI providers is straightforward:
-1. **Implement a new Client**: Create a provider-specific HTTP client.
-2. **Update Model Map**: Add new mappings in `config.json` to link model names to the new provider's endpoints.
-3. **Configure Endpoints**: Set the base URL for the new provider in the configuration.
+EverFlow is designed to be provider-agnostic. Adding new AI providers (like OpenAI, Gemini, or Grok) follows a simple pattern:
+1. **Implement a Provider Client**: Create a new HTTP client tailored to the provider's API structure.
+2. **Expand Configuration**: Add the provider's base URL to the `providers` section of `config.json`.
+3. **Update Model Map**: Map your desired Anthropic-style model names to the new provider's specific model tags.
 
-This enables seamless integration of various LLM backends while maintaining a single, stable interface for Claude Code.
+This architecture transforms EverFlow from a simple proxy into a powerful AI orchestration layer, maintaining a single, stable interface for the user while leveraging the best models from across the AI ecosystem.
 
 ---
 
