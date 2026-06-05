@@ -129,6 +129,15 @@ This architecture transforms EverFlow from a simple proxy into a powerful AI orc
 
 ---
 
+## ⚠️ Current Limitations
+
+While the architecture is designed for extensibility, please note the following current limitations:
+
+- **Single Provider Key Pool**: Currently, EverFlow assumes all API keys in the store belong to the same provider (Ollama). The key rotation logic operates on a global pool and does not yet "silo" keys by provider. 
+- **Multi-Provider Implementation**: While the **SARs** routing layer can map models to different providers, the system is not yet equipped to automatically select a key based on the target provider. Adding multiple providers currently requires a consistent key format across those providers or manual management.
+
+Support for provider-specific key pools (where keys are tagged as `openai`, `gemini`, etc., and rotated independently) is a planned architectural upgrade.
+
 ## Testing
 Run the test suite using pytest:
 ```bash
